@@ -5,7 +5,6 @@ using UnityEngine.InputSystem;
 public class DoofusController : MonoBehaviour
 {
     [Header("Movement")]
-    [SerializeField] private float moveSpeed = 3f;
     [SerializeField] private float acceleration = 20f;
     [SerializeField] private float deceleration = 25f;
 
@@ -18,16 +17,21 @@ public class DoofusController : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
 
     private Rigidbody rb;
+
     private Vector2 inputDirection;
+
+    private float moveSpeed;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
 
-        rb.interpolation = RigidbodyInterpolation.Interpolate;
-        rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
-        rb.constraints = RigidbodyConstraints.FreezeRotationX |
-                         RigidbodyConstraints.FreezeRotationZ;
+        ConfigureRigidbody();
+    }
+
+    private void Start()
+    {
+        LoadMovementConfiguration();
     }
 
     private void Update()
@@ -42,6 +46,48 @@ public class DoofusController : MonoBehaviour
         HandleRotation();
     }
 
+    private void ConfigureRigidbody()
+    {
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
+
+        rb.collisionDetectionMode =
+            CollisionDetectionMode.Continuous;
+
+        rb.constraints =
+            RigidbodyConstraints.FreezeRotationX |
+            RigidbodyConstraints.FreezeRotationZ;
+    }
+
+    private void LoadMovementConfiguration()
+    {
+        if (ConfigLoader.Instance == null)
+        {
+            Debug.LogError(
+                "ConfigLoader instance was not found."
+            );
+
+            enabled = false;
+            return;
+        }
+
+        if (ConfigLoader.Instance.Config == null)
+        {
+            Debug.LogError(
+                "Game configuration has not been loaded."
+            );
+
+            enabled = false;
+            return;
+        }
+
+        moveSpeed =
+            ConfigLoader.Instance.Config.player_data.speed;
+
+        Debug.Log(
+            $"Doofus movement speed loaded from JSON: {moveSpeed}"
+        );
+    }
+
     private void ReadMovementInput()
     {
         if (Keyboard.current == null)
@@ -53,24 +99,28 @@ public class DoofusController : MonoBehaviour
         float horizontal = 0f;
         float vertical = 0f;
 
+        // Left
         if (Keyboard.current.aKey.isPressed ||
             Keyboard.current.leftArrowKey.isPressed)
         {
             horizontal -= 1f;
         }
 
+        // Right
         if (Keyboard.current.dKey.isPressed ||
             Keyboard.current.rightArrowKey.isPressed)
         {
             horizontal += 1f;
         }
 
+        // Backward
         if (Keyboard.current.sKey.isPressed ||
             Keyboard.current.downArrowKey.isPressed)
         {
             vertical -= 1f;
         }
 
+        // Forward
         if (Keyboard.current.wKey.isPressed ||
             Keyboard.current.upArrowKey.isPressed)
         {
@@ -91,11 +141,13 @@ public class DoofusController : MonoBehaviour
             inputDirection.y
         );
 
-        Vector3 targetVelocity = moveDirection * moveSpeed;
+        Vector3 targetVelocity =
+            moveDirection * moveSpeed;
 
-        Vector3 currentVelocity = rb.linearVelocity;
+        Vector3 currentVelocity =
+            rb.linearVelocity;
 
-        // Keep the current vertical velocity untouched.
+
         rb.linearVelocity = new Vector3(
             targetVelocity.x,
             currentVelocity.y,
@@ -106,7 +158,9 @@ public class DoofusController : MonoBehaviour
     private void HandleRotation()
     {
         if (inputDirection.sqrMagnitude < 0.01f)
+        {
             return;
+        }
 
         Vector3 moveDirection = new Vector3(
             inputDirection.x,
@@ -115,21 +169,28 @@ public class DoofusController : MonoBehaviour
         ).normalized;
 
         Quaternion targetRotation =
-            Quaternion.LookRotation(moveDirection, Vector3.up);
+            Quaternion.LookRotation(
+                moveDirection,
+                Vector3.up
+            );
 
-        rb.MoveRotation(
+        Quaternion smoothRotation =
             Quaternion.Slerp(
                 rb.rotation,
                 targetRotation,
-                rotationSpeed * Time.fixedDeltaTime
-            )
-        );
+                rotationSpeed *
+                Time.fixedDeltaTime
+            );
+
+        rb.MoveRotation(smoothRotation);
     }
 
     private void HandleJumpInput()
     {
         if (Keyboard.current == null)
+        {
             return;
+        }
 
         if (Keyboard.current.spaceKey.wasPressedThisFrame &&
             IsGrounded())
@@ -142,8 +203,6 @@ public class DoofusController : MonoBehaviour
     {
         Vector3 velocity = rb.linearVelocity;
 
-        // Remove existing downward velocity so every jump
-        // gets a consistent height.
         if (velocity.y < 0f)
         {
             velocity.y = 0f;
