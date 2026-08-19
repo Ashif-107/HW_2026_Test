@@ -136,6 +136,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2876436724199131483}
   - component: {fileID: 6703131858586548769}
+  - component: {fileID: 2556450467410419538}
   m_Layer: 6
   m_Name: PlayerDetection
   m_TagString: Untagged
@@ -177,5 +178,17 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
+  m_Size: {x: 8.5, y: 1, z: 8.5}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &2556450467410419538
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2643791064030406307}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 175c0fc7f72046e46b05ce6e7061bdaa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerPulpitDetector

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Pulpit : MonoBehaviour
 {
@@ -6,8 +6,6 @@ public class Pulpit : MonoBehaviour
     private float elapsedTime;
 
     private PulpitManager manager;
-
-    private bool playerHasEntered;
 
     public void Initialize(PulpitManager pulpitManager)
     {
@@ -42,19 +40,20 @@ public class Pulpit : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter(Collider other)
+    public void PlayerEntered()
     {
-        if (!other.CompareTag("Player"))
+        if (manager == null)
         {
+            Debug.LogError(
+                $"{name}: PulpitManager reference is missing."
+            );
+
             return;
         }
 
-        if (playerHasEntered)
-        {
-            return;
-        }
-
-        playerHasEntered = true;
+        Debug.Log(
+            $"Pulpit.PlayerEntered() → {name}"
+        );
 
         manager.OnPlayerEnteredPulpit(this);
     }
@@ -64,7 +63,7 @@ public class Pulpit : MonoBehaviour
         if (manager == null)
         {
             Debug.LogError(
-                $"{name} has no PulpitManager."
+                $"{name}: PulpitManager reference is missing."
             );
 
             Destroy(gameObject);

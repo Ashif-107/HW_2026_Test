@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PulpitManager : MonoBehaviour
@@ -14,8 +14,6 @@ public class PulpitManager : MonoBehaviour
 
     private Pulpit currentPulpit;
     private Pulpit nextPulpit;
-
-    private float spawnTimer;
 
     private bool gameOver;
 
@@ -34,15 +32,18 @@ public class PulpitManager : MonoBehaviour
         HandleNextPulpitSpawn();
     }
 
+    private float spawnTimer;
+
     private void HandleNextPulpitSpawn()
     {
-        // We already have a next Pulpit.
+        // A next Pulpit already exists.
         if (nextPulpit != null)
         {
             return;
         }
 
-        // We don't have a current Pulpit.
+        // No current Pulpit means there is
+        // nothing to spawn from.
         if (currentPulpit == null)
         {
             return;
@@ -219,8 +220,7 @@ public class PulpitManager : MonoBehaviour
         }
     }
 
-    public void OnPlayerEnteredPulpit(
-        Pulpit pulpit)
+    public void OnPlayerEnteredPulpit(Pulpit pulpit)
     {
         if (gameOver)
         {
@@ -232,14 +232,11 @@ public class PulpitManager : MonoBehaviour
             return;
         }
 
-        // Player is already on this Pulpit.
         if (pulpit == currentPulpit)
         {
             return;
         }
 
-        // Player has entered a Pulpit that isn't
-        // the expected next Pulpit.
         if (pulpit != nextPulpit)
         {
             return;
@@ -249,28 +246,17 @@ public class PulpitManager : MonoBehaviour
             $"Player reached {pulpit.name}"
         );
 
-        // Old current Pulpit.
-        Pulpit oldCurrent = currentPulpit;
-
-        // Promote next → current.
         currentPulpit = nextPulpit;
 
         nextPulpit = null;
 
+        // Start a fresh 2.5 second countdown
+        // for the next Pulpit.
         spawnTimer = 0f;
 
         Debug.Log(
             $"Current Pulpit is now {currentPulpit.name}"
         );
-
-        /*
-         * We don't immediately destroy oldCurrent.
-         *
-         * It will naturally expire according to
-         * its own lifetime.
-         *
-         * Score will be added here later.
-         */
     }
 
     public void OnPulpitExpired(Pulpit pulpit)
@@ -316,8 +302,6 @@ public class PulpitManager : MonoBehaviour
             );
 
             nextPulpit = null;
-
-            spawnTimer = 0f;
 
             Destroy(pulpit.gameObject);
 
