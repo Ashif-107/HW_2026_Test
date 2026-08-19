@@ -7,12 +7,18 @@ public class Pulpit : MonoBehaviour
 
     private PulpitManager manager;
 
+    private bool playerHasEntered;
+
     public void Initialize(PulpitManager pulpitManager)
     {
         manager = pulpitManager;
 
-        GameConfig config =
-            ConfigLoader.Instance.Config;
+        LoadLifetime();
+    }
+
+    private void LoadLifetime()
+    {
+        GameConfig config = ConfigLoader.Instance.Config;
 
         destroyTime = Random.Range(
             config.pulpit_data.min_pulpit_destroy_time,
@@ -22,8 +28,7 @@ public class Pulpit : MonoBehaviour
         elapsedTime = 0f;
 
         Debug.Log(
-            $"{gameObject.name} lifetime: " +
-            $"{destroyTime:F2}s"
+            $"{name} lifetime: {destroyTime:F2}s"
         );
     }
 
@@ -37,12 +42,29 @@ public class Pulpit : MonoBehaviour
         }
     }
 
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!other.CompareTag("Player"))
+        {
+            return;
+        }
+
+        if (playerHasEntered)
+        {
+            return;
+        }
+
+        playerHasEntered = true;
+
+        manager.OnPlayerEnteredPulpit(this);
+    }
+
     private void Expire()
     {
         if (manager == null)
         {
             Debug.LogError(
-                $"{gameObject.name} has no PulpitManager."
+                $"{name} has no PulpitManager."
             );
 
             Destroy(gameObject);

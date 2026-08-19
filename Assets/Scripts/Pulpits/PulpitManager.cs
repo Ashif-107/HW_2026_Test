@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class PulpitManager : MonoBehaviour
@@ -12,7 +12,12 @@ public class PulpitManager : MonoBehaviour
 
     private readonly List<Pulpit> activePulpits = new();
 
+    private Pulpit currentPulpit;
+    private Pulpit nextPulpit;
+
     private float spawnTimer;
+
+    private bool gameOver;
 
     private void Start()
     {
@@ -21,18 +26,29 @@ public class PulpitManager : MonoBehaviour
 
     private void Update()
     {
-        HandleSpawning();
-    }
-
-    private void HandleSpawning()
-    {
-        GameConfig config = ConfigLoader.Instance.Config;
-
-        // We already have two Pulpits.
-        if (activePulpits.Count >= 2)
+        if (gameOver)
         {
             return;
         }
+
+        HandleNextPulpitSpawn();
+    }
+
+    private void HandleNextPulpitSpawn()
+    {
+        // We already have a next Pulpit.
+        if (nextPulpit != null)
+        {
+            return;
+        }
+
+        // We don't have a current Pulpit.
+        if (currentPulpit == null)
+        {
+            return;
+        }
+
+        GameConfig config = ConfigLoader.Instance.Config;
 
         spawnTimer += Time.deltaTime;
 
@@ -50,29 +66,58 @@ public class PulpitManager : MonoBehaviour
             ? startingPosition.position
             : Vector3.zero;
 
-        SpawnPulpit(position);
+        Pulpit pulpit = SpawnPulpit(position);
+
+        if (pulpit == null)
+        {
+            return;
+        }
+
+        currentPulpit = pulpit;
+
+        Debug.Log(
+            $"Current Pulpit: {currentPulpit.name}"
+        );
     }
 
     private void SpawnNextPulpit()
     {
-        if (activePulpits.Count == 0)
+        if (currentPulpit == null)
         {
-            SpawnInitialPulpit();
             return;
         }
 
-        Pulpit referencePulpit = activePulpits[^1];
-
         Vector3 spawnPosition =
             GetValidAdjacentPosition(
-                referencePulpit.transform.position
+                currentPulpit.transform.position
             );
 
-        SpawnPulpit(spawnPosition);
+        Pulpit pulpit =
+            SpawnPulpit(spawnPosition);
+
+        if (pulpit == null)
+        {
+            return;
+        }
+
+        nextPulpit = pulpit;
+
+        Debug.Log(
+            $"Next Pulpit spawned: {nextPulpit.name}"
+        );
     }
 
-    private void SpawnPulpit(Vector3 position)
+    private Pulpit SpawnPulpit(Vector3 position)
     {
+        if (pulpitPrefab == null)
+        {
+            Debug.LogError(
+                "Pulpit prefab is not assigned."
+            );
+
+            return null;
+        }
+
         GameObject pulpitObject = Instantiate(
             pulpitPrefab,
             position,
@@ -85,20 +130,19 @@ public class PulpitManager : MonoBehaviour
         if (pulpit == null)
         {
             Debug.LogError(
-                "Pulpit prefab is missing the Pulpit component."
+                "Pulpit prefab is missing Pulpit.cs."
             );
 
             Destroy(pulpitObject);
-            return;
+
+            return null;
         }
 
         activePulpits.Add(pulpit);
 
         pulpit.Initialize(this);
 
-        Debug.Log(
-            $"Pulpit spawned at {pulpit.transform.position}"
-        );
+        return pulpit;
     }
 
     private Vector3 GetValidAdjacentPosition(
@@ -112,7 +156,6 @@ public class PulpitManager : MonoBehaviour
             Vector3.right
         };
 
-        // Randomize the order of the four directions.
         ShuffleDirections(directions);
 
         foreach (Vector3 direction in directions)
@@ -127,12 +170,12 @@ public class PulpitManager : MonoBehaviour
             }
         }
 
-        // This should rarely happen.
         Debug.LogWarning(
-            "Could not find a valid adjacent Pulpit position."
+            "No valid adjacent Pulpit position found."
         );
 
-        return currentPosition + Vector3.forward * pulpitSize;
+        return currentPosition +
+               Vector3.forward * pulpitSize;
     }
 
     private bool IsPositionAvailable(
@@ -140,9 +183,15 @@ public class PulpitManager : MonoBehaviour
     {
         foreach (Pulpit pulpit in activePulpits)
         {
+            if (pulpit == null)
+            {
+                continue;
+            }
+
             if (Vector3.Distance(
                     pulpit.transform.position,
-                    position) < 0.1f)
+                    position
+                ) < 0.1f)
             {
                 return false;
             }
@@ -170,6 +219,60 @@ public class PulpitManager : MonoBehaviour
         }
     }
 
+    public void OnPlayerEnteredPulpit(
+        Pulpit pulpit)
+    {
+        if (gameOver)
+        {
+            return;
+        }
+
+        if (pulpit == null)
+        {
+            return;
+        }
+
+        // Player is already on this Pulpit.
+        if (pulpit == currentPulpit)
+        {
+            return;
+        }
+
+        // Player has entered a Pulpit that isn't
+        // the expected next Pulpit.
+        if (pulpit != nextPulpit)
+        {
+            return;
+        }
+
+        Debug.Log(
+            $"Player reached {pulpit.name}"
+        );
+
+        // Old current Pulpit.
+        Pulpit oldCurrent = currentPulpit;
+
+        // Promote next → current.
+        currentPulpit = nextPulpit;
+
+        nextPulpit = null;
+
+        spawnTimer = 0f;
+
+        Debug.Log(
+            $"Current Pulpit is now {currentPulpit.name}"
+        );
+
+        /*
+         * We don't immediately destroy oldCurrent.
+         *
+         * It will naturally expire according to
+         * its own lifetime.
+         *
+         * Score will be added here later.
+         */
+    }
+
     public void OnPulpitExpired(Pulpit pulpit)
     {
         if (pulpit == null)
@@ -177,14 +280,49 @@ public class PulpitManager : MonoBehaviour
             return;
         }
 
-        if (!activePulpits.Remove(pulpit))
+        activePulpits.Remove(pulpit);
+
+        // Current Pulpit disappeared.
+        if (pulpit == currentPulpit)
         {
+            Debug.Log(
+                "CURRENT PULPIT EXPIRED - GAME OVER"
+            );
+
+            gameOver = true;
+
+            currentPulpit = null;
+
+            if (nextPulpit != null)
+            {
+                activePulpits.Remove(nextPulpit);
+
+                Destroy(nextPulpit.gameObject);
+
+                nextPulpit = null;
+            }
+
+            Destroy(pulpit.gameObject);
+
             return;
         }
 
-        Debug.Log(
-            $"Pulpit expired: {pulpit.gameObject.name}"
-        );
+        // Next Pulpit disappeared before
+        // the player reached it.
+        if (pulpit == nextPulpit)
+        {
+            Debug.Log(
+                "Next Pulpit expired before player reached it."
+            );
+
+            nextPulpit = null;
+
+            spawnTimer = 0f;
+
+            Destroy(pulpit.gameObject);
+
+            return;
+        }
 
         Destroy(pulpit.gameObject);
     }
