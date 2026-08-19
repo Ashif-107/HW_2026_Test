@@ -5,16 +5,26 @@ public class Pulpit : MonoBehaviour
     private float destroyTime;
     private float elapsedTime;
 
-    private void Start()
+    private PulpitManager manager;
+
+    public void Initialize(PulpitManager pulpitManager)
     {
-        GameConfig config = ConfigLoader.Instance.Config;
+        manager = pulpitManager;
+
+        GameConfig config =
+            ConfigLoader.Instance.Config;
 
         destroyTime = Random.Range(
             config.pulpit_data.min_pulpit_destroy_time,
             config.pulpit_data.max_pulpit_destroy_time
         );
 
-        Debug.Log($"{name} will disappear in {destroyTime:F2}s");
+        elapsedTime = 0f;
+
+        Debug.Log(
+            $"{gameObject.name} lifetime: " +
+            $"{destroyTime:F2}s"
+        );
     }
 
     private void Update()
@@ -23,7 +33,22 @@ public class Pulpit : MonoBehaviour
 
         if (elapsedTime >= destroyTime)
         {
-            Destroy(gameObject);
+            Expire();
         }
+    }
+
+    private void Expire()
+    {
+        if (manager == null)
+        {
+            Debug.LogError(
+                $"{gameObject.name} has no PulpitManager."
+            );
+
+            Destroy(gameObject);
+            return;
+        }
+
+        manager.OnPulpitExpired(this);
     }
 }
