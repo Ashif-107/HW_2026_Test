@@ -102,6 +102,7 @@ public class Pulpit : MonoBehaviour
     private void UpdateTimerUI()
     {
         if (timerText == null) return;
+        timerText.transform.rotation = Quaternion.identity;
 
         float remaining = GetRemainingTime();
 
@@ -119,6 +120,7 @@ public class Pulpit : MonoBehaviour
 
         
         Vector3 parentScale = transform.localScale;
+
         Vector3 inverseScale = new Vector3(
             1f / parentScale.x,
             1f / parentScale.y,

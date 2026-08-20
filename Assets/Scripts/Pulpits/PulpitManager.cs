@@ -4,7 +4,7 @@ using UnityEngine;
 public class PulpitManager : MonoBehaviour
 {
     [Header("Pulpit")]
-    [SerializeField] private GameObject pulpitPrefab;
+    [SerializeField] private GameObject[] pulpitPrefabs;
     [SerializeField] private float pulpitSize = 9f;
 
     [Header("Spawn")]
@@ -36,14 +36,11 @@ public class PulpitManager : MonoBehaviour
 
     private void HandleNextPulpitSpawn()
     {
-        // A next Pulpit already exists.
         if (nextPulpit != null)
         {
             return;
         }
 
-        // No current Pulpit means there is
-        // nothing to spawn from.
         if (currentPulpit == null)
         {
             return;
@@ -110,19 +107,22 @@ public class PulpitManager : MonoBehaviour
 
     private Pulpit SpawnPulpit(Vector3 position)
     {
-        if (pulpitPrefab == null)
+        if (pulpitPrefabs == null || pulpitPrefabs.Length == 0)
         {
-            Debug.LogError(
-                "Pulpit prefab is not assigned."
-            );
+            Debug.LogError("Pulpit prefabs array is empty or not assigned.");
 
             return null;
         }
 
+        GameObject prefabToSpawn = pulpitPrefabs[Random.Range(0, pulpitPrefabs.Length)];
+
+        float randomYRotation = Random.Range(0, 4) * 90f;
+        Quaternion rotation = Quaternion.Euler(0f, randomYRotation, 0f);
+
         GameObject pulpitObject = Instantiate(
-            pulpitPrefab,
+            prefabToSpawn,
             position,
-            Quaternion.identity
+            rotation
         );
 
         Pulpit pulpit =

@@ -3,8 +3,8 @@
         "speed": 6
     },
     "pulpit_data": {
-        "min_pulpit_destroy_time": 20,
-        "max_pulpit_destroy_time": 15,
+        "min_pulpit_destroy_time": 2000,
+        "max_pulpit_destroy_time": 15000,
         "pulpit_spawn_time": 2.5
     }
 }
