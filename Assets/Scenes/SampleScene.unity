@@ -478,10 +478,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f31e0de9c6b06745bcf33131daf6ab3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PulpitManager
-  pulpitPrefabs:
-  - {fileID: 2218494376940033750, guid: 106dc4156d823ae46b6ab41b243ae023, type: 3}
-  - {fileID: 2218494376940033750, guid: dbdbcdb544ef1574594b2d81de051f33, type: 3}
-  - {fileID: 2218494376940033750, guid: abdff1cb0c2e41f4294cdc6e2908f929, type: 3}
+  biomes:
+  - biomeName: forest
+    prefabs:
+    - {fileID: 2218494376940033750, guid: 106dc4156d823ae46b6ab41b243ae023, type: 3}
+    - {fileID: 2218494376940033750, guid: dbdbcdb544ef1574594b2d81de051f33, type: 3}
+    - {fileID: 2218494376940033750, guid: abdff1cb0c2e41f4294cdc6e2908f929, type: 3}
+    - {fileID: 2218494376940033750, guid: e7d9331e64cc81349a911c2585be3a49, type: 3}
+  minPulpitsPerBiome: 4
+  maxPulpitsPerBiome: 7
   pulpitSize: 9
   startingPosition: {fileID: 0}
 --- !u!4 &1106849988

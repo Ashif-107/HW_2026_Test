@@ -1,21 +1,34 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
+public class Biome
+{
+    public string biomeName;
+    public GameObject[] prefabs;
+}
+
 public class PulpitManager : MonoBehaviour
 {
     [Header("Pulpit")]
-    [SerializeField] private GameObject[] pulpitPrefabs;
+    [SerializeField] private Biome[] biomes;
+    [SerializeField] private int minPulpitsPerBiome = 4;
+    [SerializeField] private int maxPulpitsPerBiome = 7;
     [SerializeField] private float pulpitSize = 9f;
 
     [Header("Spawn")]
     [SerializeField] private Transform startingPosition;
 
-    private readonly List<Pulpit> activePulpits = new();
-
     private Pulpit currentPulpit;
     private Pulpit nextPulpit;
 
     private bool gameOver;
+
+    private Biome currentBiome;
+    private int pulpitsLeftInBiome = 0;
+
+    private readonly List<Pulpit> activePulpits = new();
+
 
     private void Start()
     {
@@ -107,14 +120,29 @@ public class PulpitManager : MonoBehaviour
 
     private Pulpit SpawnPulpit(Vector3 position)
     {
-        if (pulpitPrefabs == null || pulpitPrefabs.Length == 0)
+        if (biomes == null || biomes.Length == 0)
         {
-            Debug.LogError("Pulpit prefabs array is empty or not assigned.");
-
+            Debug.LogError("No Biomes defined in PulpitManager.");
             return null;
         }
 
-        GameObject prefabToSpawn = pulpitPrefabs[Random.Range(0, pulpitPrefabs.Length)];
+        if (currentBiome == null || pulpitsLeftInBiome <= 0)
+        {
+            currentBiome = biomes[Random.Range(0, biomes.Length)];
+            pulpitsLeftInBiome = Random.Range(minPulpitsPerBiome, maxPulpitsPerBiome + 1);
+            Debug.Log($"Entered Biome: {currentBiome.biomeName}. It will last for {pulpitsLeftInBiome} pulpits.");
+        }
+
+        if (currentBiome.prefabs == null || currentBiome.prefabs.Length == 0)
+        {
+            Debug.LogError($"Biome '{currentBiome.biomeName}' has no prefabs assigned.");
+            return null;
+        }
+
+        GameObject prefabToSpawn = currentBiome.prefabs[Random.Range(0, currentBiome.prefabs.Length)];
+
+        pulpitsLeftInBiome--;
+
 
         float randomYRotation = Random.Range(0, 4) * 90f;
         Quaternion rotation = Quaternion.Euler(0f, randomYRotation, 0f);
