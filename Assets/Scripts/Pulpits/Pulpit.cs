@@ -6,9 +6,14 @@ public class Pulpit : MonoBehaviour
     [Header("UI Settings")]
     [SerializeField] private TextMeshPro timerText;
     [SerializeField] private float minTextScale = 1f;
-    [SerializeField] private float maxTextScale = 2.5f;
+    [SerializeField] private float maxTextScale = 2f;
     [SerializeField] private Color startColor = Color.white;
     [SerializeField] private Color endColor = Color.red;
+
+    [Header("Shake Settings")]
+    [SerializeField] private float shakeTimeThreshold = 2f;    
+    [SerializeField] private float maxShakeIntensity = 0.08f;
+    private Vector3 originalPosition;
 
     private float destroyTime;
     private float elapsedTime;
@@ -19,6 +24,7 @@ public class Pulpit : MonoBehaviour
     public void Initialize(PulpitManager pulpitManager)
     {
         manager = pulpitManager;
+        originalPosition = transform.position;
         LoadLifetime();
     }
 
@@ -38,7 +44,25 @@ public class Pulpit : MonoBehaviour
     {
         elapsedTime += Time.deltaTime;
 
-        UpdateTimerUI(); // Handle the visual text effects every frame
+        UpdateTimerUI();
+
+        float remaining = GetRemainingTime();
+        if (remaining <= shakeTimeThreshold && remaining > 0)
+        {
+            // Shake gets more intense as it gets closer to 0 seconds
+            float intensityMultiplier = 1f - (remaining / shakeTimeThreshold);
+            float currentShake = maxShakeIntensity * intensityMultiplier;
+
+            // Generate a random offset (only on X and Z so Doofus doesn't bounce vertically)
+            Vector3 randomOffset = new Vector3(
+                Random.Range(-1f, 1f),
+                0f,
+                Random.Range(-1f, 1f)
+            ) * currentShake;
+
+            transform.position = originalPosition + randomOffset;
+        }
+
 
         if (elapsedTime >= destroyTime)
         {

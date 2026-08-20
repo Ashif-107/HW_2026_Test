@@ -62,7 +62,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2180264, guid: 2e498d1c8094910479dc3e1b768306a4, type: 2}
+  - {fileID: 4874605985846967704, guid: a1db455ce0f433544b630cc8ba1a8ba1, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -108,8 +108,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 5
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2e498d1c8094910479dc3e1b768306a4, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 2e498d1c8094910479dc3e1b768306a4, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: a1db455ce0f433544b630cc8ba1a8ba1, type: 2}
+  m_sharedMaterial: {fileID: 4874605985846967704, guid: a1db455ce0f433544b630cc8ba1a8ba1, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -133,8 +133,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 7
-  m_fontSizeBase: 7
+  m_fontSize: 5
+  m_fontSizeBase: 5
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 1
@@ -310,9 +310,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Pulpit
   timerText: {fileID: 2435309417725332862}
   minTextScale: 1
-  maxTextScale: 2.5
+  maxTextScale: 2
   startColor: {r: 1, g: 1, b: 1, a: 1}
   endColor: {r: 1, g: 0, b: 0, a: 1}
+  shakeTimeThreshold: 20
+  maxShakeIntensity: 0.08
 --- !u!1 &2643791064030406307
 GameObject:
   m_ObjectHideFlags: 0
