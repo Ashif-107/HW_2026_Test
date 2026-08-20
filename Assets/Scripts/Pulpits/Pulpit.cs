@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using TMPro; // Required for TextMeshPro
+using TMPro; 
 
 public class Pulpit : MonoBehaviour
 {
@@ -20,6 +20,12 @@ public class Pulpit : MonoBehaviour
 
     private PulpitManager manager;
     private bool playerHasEntered;
+
+    [Header("Fall Settings")]
+    [SerializeField] private float fallSpeed = 25f;       
+    [SerializeField] private float fallDuration = 2f;
+    private bool isFalling = false;
+
 
     public void Initialize(PulpitManager pulpitManager)
     {
@@ -42,18 +48,31 @@ public class Pulpit : MonoBehaviour
 
     private void Update()
     {
+
+        // Fall Logix
+        if (isFalling)
+        {
+            transform.Translate(Vector3.down * fallSpeed * Time.deltaTime, Space.World);
+
+            fallDuration -= Time.deltaTime;
+            if (fallDuration <= 0f)
+            {
+                Expire(); 
+            }
+            return;
+        }
+
         elapsedTime += Time.deltaTime;
 
         UpdateTimerUI();
 
+        // Shake Logic
         float remaining = GetRemainingTime();
         if (remaining <= shakeTimeThreshold && remaining > 0)
         {
-            // Shake gets more intense as it gets closer to 0 seconds
             float intensityMultiplier = 1f - (remaining / shakeTimeThreshold);
             float currentShake = maxShakeIntensity * intensityMultiplier;
 
-            // Generate a random offset (only on X and Z so Doofus doesn't bounce vertically)
             Vector3 randomOffset = new Vector3(
                 Random.Range(-1f, 1f),
                 0f,
@@ -66,7 +85,17 @@ public class Pulpit : MonoBehaviour
 
         if (elapsedTime >= destroyTime)
         {
-            Expire();
+            StartFalling();
+        }
+    }
+
+    private void StartFalling()
+    {
+        isFalling = true;
+
+        if (timerText != null)
+        {
+            timerText.gameObject.SetActive(false);
         }
     }
 
