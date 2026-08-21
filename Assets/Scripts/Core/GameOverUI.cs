@@ -40,6 +40,10 @@ public class GameOverUI : MonoBehaviour
             // We don't need the word "FINAL SCORE:" because your image already says "SCORE"!
             finalScoreText.text = ScoreManager.Instance.Score.ToString();
         }
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayGameOverSound();
+        }
     }
 
     public void OnTryAgainClicked()
