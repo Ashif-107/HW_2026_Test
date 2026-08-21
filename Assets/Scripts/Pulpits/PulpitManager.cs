@@ -309,6 +309,11 @@ public class PulpitManager : MonoBehaviour
 
             gameOver = true;
 
+            if (GameOverUI.Instance != null)
+            {
+                GameOverUI.Instance.ShowGameOver();
+            }
+
             currentPulpit = null;
 
             if (nextPulpit != null)

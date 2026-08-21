@@ -20,6 +20,7 @@ public class DoofusController : MonoBehaviour
 
     private Vector2 inputDirection;
 
+    private bool hasFallen = false;
     private float moveSpeed;
 
     private void Awake()
@@ -38,6 +39,7 @@ public class DoofusController : MonoBehaviour
     {
         ReadMovementInput();
         HandleJumpInput();
+        CheckFall();
     }
 
     private void FixedUpdate()
@@ -199,6 +201,7 @@ public class DoofusController : MonoBehaviour
         }
     }
 
+
     private void Jump()
     {
         Vector3 velocity = rb.linearVelocity;
@@ -223,5 +226,19 @@ public class DoofusController : MonoBehaviour
             groundCheckDistance + 0.5f,
             groundLayer
         );
+    }
+
+    private void CheckFall()
+    {
+        // If Doofus falls below -5 on the Y axis, trigger the Game Over!
+        if (transform.position.y < -5f)
+        {
+            hasFallen = true;
+            Debug.Log("Doofus fell off the edge!");
+            if (GameOverUI.Instance != null)
+            {
+                GameOverUI.Instance.ShowGameOver();
+            }
+        }
     }
 }
