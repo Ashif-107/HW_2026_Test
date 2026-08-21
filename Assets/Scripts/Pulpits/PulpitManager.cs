@@ -274,7 +274,6 @@ public class PulpitManager : MonoBehaviour
             $"Player reached {pulpit.name}"
         );
 
-        // --- NEW: Add a point when successfully reaching the new pulpit ---
         if (ScoreManager.Instance != null)
         {
             ScoreManager.Instance.AddScore(1);
@@ -284,8 +283,7 @@ public class PulpitManager : MonoBehaviour
 
         nextPulpit = null;
 
-        // Start a fresh 2.5 second countdown
-        // for the next Pulpit.
+
         spawnTimer = 0f;
 
         Debug.Log(
