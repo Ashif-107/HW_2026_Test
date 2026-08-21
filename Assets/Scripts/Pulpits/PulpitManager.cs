@@ -274,6 +274,12 @@ public class PulpitManager : MonoBehaviour
             $"Player reached {pulpit.name}"
         );
 
+        // --- NEW: Add a point when successfully reaching the new pulpit ---
+        if (ScoreManager.Instance != null)
+        {
+            ScoreManager.Instance.AddScore(1);
+        }
+
         currentPulpit = nextPulpit;
 
         nextPulpit = null;
